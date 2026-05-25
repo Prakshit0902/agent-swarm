@@ -18,14 +18,13 @@ MODELS = {
     "qwen3_coder_30b_fp8":  "Qwen/Qwen3-Coder-30B-A3B-Instruct-FP8",
     "qwen3_coder_30b_awq":  "AIDXteam/Qwen3-Coder-30B-A3B-Instruct-AWQ",
     "qwen25_coder_7b":      "Qwen/Qwen2.5-Coder-7B-Instruct",
-    "gemma3_27b":           "google/gemma-3-27b-it",   # correction: gemma-4-27b-it does NOT exist
-    "gemma2_9b":            "google/gemma-2-9b-it",    # correction: gemma-4-9b-it does NOT exist
+    "gemma3_27b":           "google/gemma-3-27b-it",
+    "gemma2_9b":            "google/gemma-2-9b-it",
     "qwen25_coder_7b_gguf": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
 }
 
 def choose(force: str | None = None) -> tuple[BackendChoice, GPUInfo]:
     g = probe()
-    notes = []
 
     if force == "cpu" or not g.available:
         c = BackendChoice("llamacpp", MODELS["qwen25_coder_7b_gguf"],
