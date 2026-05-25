@@ -1,4 +1,4 @@
-torch==2.4.0
+torch>=2.0.0
 transformers>=4.51.0,<4.55.0
 accelerate>=0.34.0
 bitsandbytes>=0.43.3
@@ -7,7 +7,7 @@ einops
 safetensors
 
 # Quantization (AWQ MoE)
-autoawq>=0.2.6 ; platform_system == "Linux"
+autoawq>=0.2.7 ; platform_system == "Linux"
 
 # Optional vLLM (only if Ampere+ detected)
 # vllm==0.6.3.post1 ; sys_platform == "linux"
