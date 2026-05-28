@@ -161,12 +161,13 @@ python main.py info --tier 2
 
 ## Technical Details
 
-### Hardware-based Backend Selection
-The selector probes the system using `torch.cuda` and assigns the model backend as follows:
-* **Ampere/Hopper GPUs (more than 70 GB total VRAM)**: Runs Qwen2.5-Coder-7B-Instruct in BF16 using **vLLM** with Tensor Parallelism enabled.
-* **Turing GPUs (such as T4 or RTX 20xx with more than 28 GB total VRAM)**: Runs Qwen2.5-Coder-7B-Instruct (AWQ quantized) via **Hugging Face Transformers** and Accelerate device placement.
-* **Low VRAM / Standard GPUs**: Runs Qwen2.5-Coder-3B-Instruct in 4-bit quantization via Hugging Face.
-* **CPU and Non-CUDA systems**: Falls back to Qwen2.5-Coder-1.5B-Instruct-GGUF using **Llama.cpp**.
+### Groq-based Cloud Backend Selection
+The framework executes model inference through the Groq Cloud API. Make sure to set your `GROQ_API_KEY` in the environment. The model is determined based on the selected tier:
+* **Tier 1 (Default / Highest capability)**: Runs `llama-3.3-70b-specdec` (Llama 3.3 70B Instruct).
+* **Tier 2 (High context / Fast MOE)**: Runs `mixtral-8x7b-32768` (Mixtral 8x7B Instruct).
+* **Tier 3 (Ultra fast / Low resource)**: Runs `llama-3.1-8b-instant` (Llama 3.1 8B Instruct).
+
+You can also customize the model explicitly by setting the `GROQ_MODEL` environment variable.
 
 ### Syntax-Aware Chunking
 Instead of splitting text using arbitrary character limits, the retrieval pipeline parses supported programming languages (such as Python, JavaScript, TypeScript, Go, Rust, Java, C, and C++) using tree-sitter. This groups complete semantic blocks (classes, functions, decorators) together, ensuring the RAG model receives functional code structures instead of fragmented lines.

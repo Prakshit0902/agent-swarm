@@ -9,6 +9,9 @@ class LLMEngine(Protocol):
     async def stream(self, messages: ChatMessages, **kw) -> AsyncIterator[str]: ...
 
 def build_engine(choice: BackendChoice) -> LLMEngine:
+    if choice.backend == "groq":
+        from .groq_backend import GroqEngine
+        return GroqEngine(choice)
     if choice.backend == "vllm":
         from .vllm_backend import VLLMEngine
         return VLLMEngine(choice)
