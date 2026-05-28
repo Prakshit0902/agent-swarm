@@ -140,10 +140,21 @@ To run the swarm on a task, provide the task description and optionally the repo
 python main.py solve "Add a database validation to check for duplicate email registrations" --repo /path/to/target/project
 ```
 
+You can also force a specific execution tier using the `--tier` or `-t` flag:
+```bash
+# Force the lightweight CPU fallback tier (Tier 3) to run on a non-GPU instance
+python main.py solve "Add a database validation..." --repo /path/to/target/project --tier 3
+```
+
 ### 3. Displaying GPU Backend Information
 You can verify which backend engine the framework has chosen for your hardware:
 ```bash
 python main.py info
+```
+
+Or check the parameters of a forced tier choice:
+```bash
+python main.py info --tier 2
 ```
 
 ---
@@ -152,10 +163,10 @@ python main.py info
 
 ### Hardware-based Backend Selection
 The selector probes the system using `torch.cuda` and assigns the model backend as follows:
-* **Ampere/Hopper GPUs (more than 70 GB total VRAM)**: Runs Qwen3-Coder-30B-Instruct in FP8 or BF16 using **vLLM** with Tensor Parallelism enabled.
-* **Turing GPUs (such as T4 or RTX 20xx with more than 28 GB total VRAM)**: Runs Qwen3-Coder-30B-Instruct (AWQ quantized) via **Hugging Face Transformers** and Accelerate device placement.
-* **Low VRAM GPUs (less than 24 GB VRAM)**: Runs Qwen2.5-Coder-7B-Instruct in 4-bit quantization.
-* **CPU and Non-CUDA systems**: Falls back to Qwen2.5-Coder-7B-Instruct-GGUF using **Llama.cpp**.
+* **Ampere/Hopper GPUs (more than 70 GB total VRAM)**: Runs Qwen2.5-Coder-7B-Instruct in BF16 using **vLLM** with Tensor Parallelism enabled.
+* **Turing GPUs (such as T4 or RTX 20xx with more than 28 GB total VRAM)**: Runs Qwen2.5-Coder-7B-Instruct (AWQ quantized) via **Hugging Face Transformers** and Accelerate device placement.
+* **Low VRAM / Standard GPUs**: Runs Qwen2.5-Coder-3B-Instruct in 4-bit quantization via Hugging Face.
+* **CPU and Non-CUDA systems**: Falls back to Qwen2.5-Coder-1.5B-Instruct-GGUF using **Llama.cpp**.
 
 ### Syntax-Aware Chunking
 Instead of splitting text using arbitrary character limits, the retrieval pipeline parses supported programming languages (such as Python, JavaScript, TypeScript, Go, Rust, Java, C, and C++) using tree-sitter. This groups complete semantic blocks (classes, functions, decorators) together, ensuring the RAG model receives functional code structures instead of fragmented lines.

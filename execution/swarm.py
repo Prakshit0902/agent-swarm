@@ -21,8 +21,8 @@ DIFF_RE = re.compile(r"```diff\s*([\s\S]*?)```", re.MULTILINE)
 console = Console()
 
 class CodingSwarm:
-    def __init__(self, repo_root=None):
-        choice, gpu = choose()
+    def __init__(self, repo_root=None, model_tier: int | str | None = None):
+        choice, gpu = choose(force=model_tier)
         self.engine = build_engine(choice)
         self.planner   = Planner(self.engine)
         self.research  = Researcher(self.engine)
