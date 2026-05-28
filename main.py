@@ -34,7 +34,7 @@ def solve(
     """Run the swarm on a task."""
     if repo:
         s = RepoStore(); s.index_repo(Path(repo))
-    sw = CodingSwarm(model_tier=tier)
+    sw = CodingSwarm(repo_root=repo, model_tier=tier)
     res = asyncio.run(sw.solve(task))
     print(res)
 

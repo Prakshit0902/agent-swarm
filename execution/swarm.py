@@ -32,7 +32,10 @@ class CodingSwarm:
         self.review    = Reviewer(self.engine)
         self.debug     = Debugger(self.engine)
         self.store     = RepoStore()
-        self.repo_root = repo_root or settings.workspace
+        if repo_root:
+            from pathlib import Path
+            settings.workspace = Path(repo_root).resolve()
+        self.repo_root = settings.workspace
         self.session   = SessionMemory(str(uuid.uuid4()))
 
     async def _parallel_context(self, task, plan):
