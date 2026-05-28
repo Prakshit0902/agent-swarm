@@ -12,8 +12,10 @@ app = typer.Typer()
 @app.command()
 def index(repo: str = "."):
     """Index a local repo for RAG."""
+    from config.settings import resolve_repo_path
     s = RepoStore()
-    n = s.index_repo(Path(repo))
+    resolved = resolve_repo_path(repo)
+    n = s.index_repo(resolved)
     print(f"[green]Indexed {n} chunks[/green]")
 
 @app.command()
@@ -32,9 +34,12 @@ def solve(
     )
 ):
     """Run the swarm on a task."""
+    resolved_repo = None
     if repo:
-        s = RepoStore(); s.index_repo(Path(repo))
-    sw = CodingSwarm(repo_root=repo, model_tier=tier)
+        from config.settings import resolve_repo_path
+        resolved_repo = resolve_repo_path(repo)
+        s = RepoStore(); s.index_repo(resolved_repo)
+    sw = CodingSwarm(repo_root=resolved_repo, model_tier=tier)
     res = asyncio.run(sw.solve(task))
     print(res)
 

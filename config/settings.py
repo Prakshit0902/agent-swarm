@@ -42,3 +42,17 @@ for p in (settings.workspace, settings.sandbox, settings.chroma_dir, settings.ca
 os.environ.setdefault("HF_HOME", str(settings.cache_dir))
 os.environ.setdefault("HF_HUB_CACHE", str(settings.cache_dir))
 os.environ.setdefault("TRANSFORMERS_CACHE", str(settings.cache_dir))
+
+def resolve_repo_path(repo_path: str | Path) -> Path:
+    p = Path(repo_path)
+    if p.is_absolute() and p.exists():
+        return p
+    if p.exists():
+        return p.resolve()
+    p_ws = settings.workspace / p
+    if p_ws.exists():
+        return p_ws.resolve()
+    p_root = settings.root / p
+    if p_root.exists():
+        return p_root.resolve()
+    return p.resolve()
