@@ -14,8 +14,8 @@ class BackendChoice:
 
 # Groq API cloud model mappings
 MODELS = {
-    "1": "llama-3.3-70b-specdec",
-    "2": "mixtral-8x7b-32768",
+    "1": "llama-3.3-70b-versatile",
+    "2": "llama-3.3-70b-versatile",
     "3": "llama-3.1-8b-instant",
 }
 

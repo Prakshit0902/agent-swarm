@@ -163,8 +163,8 @@ python main.py info --tier 2
 
 ### Groq-based Cloud Backend Selection
 The framework executes model inference through the Groq Cloud API. Make sure to set your `GROQ_API_KEY` in the environment. The model is determined based on the selected tier:
-* **Tier 1 (Default / Highest capability)**: Runs `llama-3.3-70b-specdec` (Llama 3.3 70B Instruct).
-* **Tier 2 (High context / Fast MOE)**: Runs `mixtral-8x7b-32768` (Mixtral 8x7B Instruct).
+* **Tier 1 (Default / Highest capability)**: Runs `llama-3.3-70b-versatile` (Llama 3.3 70B Instruct).
+* **Tier 2 (High capability)**: Runs `llama-3.3-70b-versatile` (Llama 3.3 70B Instruct).
 * **Tier 3 (Ultra fast / Low resource)**: Runs `llama-3.1-8b-instant` (Llama 3.1 8B Instruct).
 
 You can also customize the model explicitly by setting the `GROQ_MODEL` environment variable.
