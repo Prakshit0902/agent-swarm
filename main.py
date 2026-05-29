@@ -1,7 +1,12 @@
 from __future__ import annotations
-import asyncio, typer
+import asyncio, typer, warnings
 from pathlib import Path
 from rich import print
+
+# Suppress verbose terminal spam from PyTorch, Transformers, bitsandbytes, and DuckDuckGo
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 from config.settings import settings
 from execution.swarm import CodingSwarm
 from rag.store import RepoStore

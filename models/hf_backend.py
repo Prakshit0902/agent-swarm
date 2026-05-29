@@ -1,8 +1,11 @@
 from __future__ import annotations
-import asyncio, os, torch, threading
+import asyncio, os, torch, threading, warnings
 from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer, BitsAndBytesConfig
 from config.settings import settings
 from .backend_selector import BackendChoice
+
+# Suppress bitsandbytes FutureWarning spam during generation
+warnings.filterwarnings("ignore", category=FutureWarning, module="bitsandbytes.*")
 
 
 class HFEngine:
