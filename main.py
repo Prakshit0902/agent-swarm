@@ -20,14 +20,15 @@ def resolve_path(p_str: str) -> Path:
     p = Path(p_str)
     if p.exists() or p.is_absolute():
         return p
-    # fallback to internal workspace
-    # if user passed 'workspace/repo', try checking settings.workspace / 'repo'
+    # Try resolving relative to settings.workspace (e.g. settings.workspace / "workspace/repo")
+    alt = settings.workspace / p_str
+    if alt.exists():
+        return alt
+    # Fallback: if user passed 'workspace/repo', check settings.workspace / 'repo'
     if p_str.startswith("workspace/"):
-        alt = settings.workspace / p_str.replace("workspace/", "", 1)
-        if alt.exists(): return alt
-    # otherwise try settings.workspace / p_str
-    if (settings.workspace / p_str).exists():
-        return settings.workspace / p_str
+        alt_strip = settings.workspace / p_str.replace("workspace/", "", 1)
+        if alt_strip.exists():
+            return alt_strip
     return p
 
 @app.command()
