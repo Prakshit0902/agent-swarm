@@ -42,6 +42,10 @@ Implement changes as UNIFIED DIFFS only, fenced in:
 +++ b/path
 @@ ...
 ```
+CRITICAL RULES for diffs:
+1. Do NOT put markdown code blocks (e.g. ```python) INSIDE the diff block.
+2. Include at least 3 lines of unchanged context before and after your changes so the patch can be applied accurately.
+3. Ensure the code inside the diff is syntactically valid and properly aligned.
 After diffs, emit JSON: {"diffs_applied_to":["path1","path2"], "notes":"..."}
 """
 

@@ -3,8 +3,7 @@ import subprocess, tempfile, os
 from config.settings import settings
 from .registry import tool
 
-def fuzzy_apply_diff(diff_text: str) -> dict:
-    lines = diff_text.splitlines()
+def _fuzzy_apply_single_file(lines: list[str]) -> dict:
     target_file = None
     for line in lines:
         if line.startswith("+++"):
@@ -73,16 +72,24 @@ def fuzzy_apply_diff(diff_text: str) -> dict:
         search_str = "\n".join(search_lines)
         replace_str = "\n".join(replace_lines)
 
-        if search_str in new_content:
+        if search_str in new_content and search_str.strip():
             new_content = new_content.replace(search_str, replace_str, 1)
             applied_any = True
         elif not search_str.strip():
-            new_content = (new_content + "\n" + replace_str).strip() + "\n"
+            if new_content and not new_content.endswith("\n"):
+                new_content += "\n"
+            new_content += replace_str
+            if not new_content.endswith("\n"):
+                new_content += "\n"
             applied_any = True
         else:
             norm_search = "\n".join(l.strip() for l in search_lines if l.strip())
             if not norm_search:
-                new_content = (new_content + "\n" + replace_str).strip() + "\n"
+                if new_content and not new_content.endswith("\n"):
+                    new_content += "\n"
+                new_content += replace_str
+                if not new_content.endswith("\n"):
+                    new_content += "\n"
                 applied_any = True
                 continue
 
@@ -105,9 +112,42 @@ def fuzzy_apply_diff(diff_text: str) -> dict:
     if applied_any:
         file_path.parent.mkdir(parents=True, exist_ok=True)
         file_path.write_text(new_content, "utf-8")
-        return {"ok": True, "stdout": "Fuzzy applied successfully"}
+        return {"ok": True, "stdout": f"Fuzzy applied successfully to {target_file}"}
     else:
-        return {"ok": False, "stderr": "Fuzzy matching failed: context block not found in target file"}
+        return {"ok": False, "stderr": f"Fuzzy matching failed: context block not found in {target_file}"}
+
+def fuzzy_apply_diff(diff_text: str) -> dict:
+    file_diffs = []
+    current_diff = []
+    
+    for line in diff_text.splitlines():
+        if line.startswith("--- "):
+            if current_diff:
+                file_diffs.append(current_diff)
+            current_diff = [line]
+        elif current_diff:
+            current_diff.append(line)
+        elif line.startswith("+++ ") and not current_diff:
+            current_diff = [line]
+            
+    if current_diff:
+        file_diffs.append(current_diff)
+    
+    if not file_diffs:
+        file_diffs = [diff_text.splitlines()]
+
+    all_applied = True
+    messages = []
+    
+    for diff_lines in file_diffs:
+        res = _fuzzy_apply_single_file(diff_lines)
+        if not res["ok"]:
+            all_applied = False
+            messages.append(res["stderr"])
+        else:
+            messages.append(res["stdout"])
+
+    return {"ok": all_applied, "stdout": "\n".join(messages), "stderr": "\n".join(messages)}
 
 @tool("apply_patch","Apply a unified diff to the workspace.")
 def apply_patch(diff_text: str) -> dict:

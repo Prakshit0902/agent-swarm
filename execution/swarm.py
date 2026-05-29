@@ -72,9 +72,22 @@ class CodingSwarm:
         console.print("[bold blue]Repo Context:[/bold blue]\n", repo_ctx)
         console.print("[bold blue]Design/Architecture:[/bold blue]\n", design)
 
+        files_to_inspect = plan.get("files_to_inspect", []) if isinstance(plan, dict) else []
+
         for it in range(1, settings.max_iterations+1):
             console.rule(f"Iteration {it}")
-            code_out = await self.coder.code(plan, design, repo_ctx)
+            
+            full_files_content = ""
+            for fpath in files_to_inspect:
+                try:
+                    full_path = settings.workspace / fpath
+                    if full_path.exists() and full_path.is_file():
+                        content = full_path.read_text("utf-8", "replace")
+                        full_files_content += f"--- {fpath} ---\n{content}\n\n"
+                except Exception as e:
+                    full_files_content += f"--- {fpath} ---\nError reading file: {e}\n\n"
+
+            code_out = await self.coder.code(plan, design, repo_ctx, full_files=full_files_content)
             self.session.log("assistant","coder",code_out)
             console.print("[bold magenta]Coder Output:[/bold magenta]\n", code_out)
             self._apply_diffs(code_out)
@@ -95,6 +108,12 @@ class CodingSwarm:
             dbg = await self.debug.run(json.dumps({"review":review,"exec":exec_report})[:8000])
             self.session.log("assistant","debugger",dbg)
             console.print("[bold red]Debugger:[/bold red]\n", dbg)
+            
+            if isinstance(dbg, dict):
+                for f in dbg.get("files_to_edit", []):
+                    if f not in files_to_inspect:
+                        files_to_inspect.append(f)
+
             # feed debug result back as design refinement
             design = {"design": design, "patch_plan": dbg}
 
