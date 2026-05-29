@@ -79,8 +79,15 @@ class HFEngine:
             repetition_penalty=settings.repetition_penalty,
             pad_token_id=self.tokenizer.pad_token_id,
         )
+        
+        def _generate():
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                return self.model.generate(**inputs, **gen_kwargs)
+
         async with self._lock:
-            out = await asyncio.to_thread(self.model.generate, **inputs, **gen_kwargs)
+            out = await asyncio.to_thread(_generate)
         new = out[0][inputs.input_ids.shape[-1]:]
         return self.tokenizer.decode(new, skip_special_tokens=True)
 
@@ -98,7 +105,14 @@ class HFEngine:
             streamer=streamer,
             pad_token_id=self.tokenizer.pad_token_id,
         )
-        thread = threading.Thread(target=self.model.generate, kwargs=gen_kwargs, daemon=True)
+
+        def _generate():
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self.model.generate(**gen_kwargs)
+
+        thread = threading.Thread(target=_generate, daemon=True)
         async with self._lock:
             thread.start()
             for tok in streamer:

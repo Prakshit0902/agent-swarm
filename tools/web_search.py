@@ -4,7 +4,10 @@ from .registry import tool
 @tool("web_search","Search the web via DuckDuckGo and fetch snippets.")
 async def web_search(query: str, k: int = 5) -> list[dict]:
     try:
-        from duckduckgo_search import DDGS
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from duckduckgo_search import DDGS
     except ImportError:
         return []
     out = []
