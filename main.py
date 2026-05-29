@@ -1,4 +1,6 @@
 from __future__ import annotations
+import os
+os.environ["ANONYMIZED_TELEMETRY"] = "False"  # Disable chromadb telemetry which fails on Kaggle
 import asyncio, typer, warnings
 from pathlib import Path
 from rich import print

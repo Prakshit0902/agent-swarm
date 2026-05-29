@@ -11,10 +11,12 @@ class RepoStore:
         self.col = self.client.get_or_create_collection(collection)
         self.embed = Embedder()
 
-    def index_repo(self, root: Path, exts=(".py",".md",".js",".ts",".go",".rs",".java",".cpp",".c",".yaml",".toml",".json")):
+    def index_repo(self, root: Path, exts=(".py",".md",".js",".ts",".go",".rs",".java",".cpp",".c",".yaml",".toml",".json",".csv",".txt",".html",".xml",".sql",".sh")):
         docs, ids, metas = [], [], []
         for p in root.rglob("*"):
-            if not p.is_file() or p.suffix not in exts or p.stat().st_size > 500_000:
+            if ".git" in p.parts:
+                continue
+            if not p.is_file() or p.suffix.lower() not in exts or p.stat().st_size > 500_000:
                 continue
             for ch in chunk_file(p):
                 h = hashlib.sha1((ch["path"]+str(ch["start"])+ch["text"][:64]).encode()).hexdigest()
