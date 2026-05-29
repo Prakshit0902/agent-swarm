@@ -7,6 +7,14 @@ from pathlib import Path
 
 class RepoStore:
     def __init__(self, collection: str = "repo"):
+        # Monkey patch chromadb's telemetry client to completely nullify the broken capture() method
+        try:
+            import chromadb.telemetry.posthog
+            class DummyClient:
+                def capture(self, *args, **kwargs): pass
+            chromadb.telemetry.posthog.Posthog = DummyClient
+        except Exception:
+            pass
         self.client = chromadb.PersistentClient(path=str(settings.chroma_dir))
         self.col = self.client.get_or_create_collection(collection)
         self.embed = Embedder()

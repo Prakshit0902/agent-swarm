@@ -68,11 +68,15 @@ class CodingSwarm:
         self.session.log("assistant","researcher",research)
         self.session.log("assistant","repo_ctx",repo_ctx)
         self.session.log("assistant","architect",design)
+        console.print("[bold blue]Research:[/bold blue]\n", research)
+        console.print("[bold blue]Repo Context:[/bold blue]\n", repo_ctx)
+        console.print("[bold blue]Design/Architecture:[/bold blue]\n", design)
 
         for it in range(1, settings.max_iterations+1):
             console.rule(f"Iteration {it}")
             code_out = await self.coder.code(plan, design, repo_ctx)
             self.session.log("assistant","coder",code_out)
+            console.print("[bold magenta]Coder Output:[/bold magenta]\n", code_out)
             self._apply_diffs(code_out)
 
             lint = ruff(".")
@@ -90,6 +94,7 @@ class CodingSwarm:
 
             dbg = await self.debug.run(json.dumps({"review":review,"exec":exec_report})[:8000])
             self.session.log("assistant","debugger",dbg)
+            console.print("[bold red]Debugger:[/bold red]\n", dbg)
             # feed debug result back as design refinement
             design = {"design": design, "patch_plan": dbg}
 
