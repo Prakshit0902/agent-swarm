@@ -16,12 +16,27 @@ from tools.git_tool import git_clone
 
 app = typer.Typer()
 
+def resolve_path(p_str: str) -> Path:
+    p = Path(p_str)
+    if p.exists() or p.is_absolute():
+        return p
+    # fallback to internal workspace
+    # if user passed 'workspace/repo', try checking settings.workspace / 'repo'
+    if p_str.startswith("workspace/"):
+        alt = settings.workspace / p_str.replace("workspace/", "", 1)
+        if alt.exists(): return alt
+    # otherwise try settings.workspace / p_str
+    if (settings.workspace / p_str).exists():
+        return settings.workspace / p_str
+    return p
+
 @app.command()
 def index(repo: str = "."):
     """Index a local repo for RAG."""
+    repo_path = resolve_path(repo)
     s = RepoStore()
-    n = s.index_repo(Path(repo))
-    print(f"[green]Indexed {n} chunks[/green]")
+    n = s.index_repo(repo_path)
+    print(f"[green]Indexed {n} chunks from {repo_path}[/green]")
 
 @app.command()
 def clone(url: str, dest: str = "repo"):
@@ -40,7 +55,8 @@ def solve(
 ):
     """Run the swarm on a task."""
     if repo:
-        s = RepoStore(); s.index_repo(Path(repo))
+        repo_path = resolve_path(repo)
+        s = RepoStore(); s.index_repo(repo_path)
     sw = CodingSwarm(model_tier=tier)
     res = asyncio.run(sw.solve(task))
     print(res)
